@@ -1,10 +1,9 @@
 import java.util.Random;
 
 public class Homework {
-    public static int bossHealth = 1000;
+    public static int bossHealth = 1500;
     public static int bossDamage = 50;
     public static String bossDefense;
-    public static boolean isBossStunned;
     public static int isBossStunning;
 
     public static int[] heroesHealth = {290, 270, 250, 260, 400, 240, 230, 280};
@@ -75,10 +74,7 @@ public class Homework {
                 if (heroesAttackType[i] == "Thor"){
                     Random random1 = new Random();
                     int stun = random1.nextInt(2);
-                    if (stun == 0) {
-                        isBossStunned = true;
-                        isBossStunning = 2;
-                    }
+                    if (stun == 0) isBossStunning = 2;
                 }
 
                 int damage  = heroesDamage[i];
@@ -97,7 +93,7 @@ public class Homework {
 
     // Boss Attacks
     public static void bossAttack() {
-        if (isBossStunned) return;
+        if (isBossStunning == 1) return;
         for (int i = 0; i < heroesHealth.length; i++) {
             if (heroesHealth[i] > 0) {
                 if (heroesAttackType[i] == "Lucky") {
@@ -121,21 +117,28 @@ public class Homework {
 
     // Heals && Respawn
     public static void healHeroes() {
-        int index = -1;
+        int indexHeal = -1, indexRespawn = -1;
         for (int i = 0; i < heroesHealth.length; i++) {
-            if (heroesHealth[i] == 0 && heroesHealth[6] > 0) {
+            if (heroesHealth[i] == 0 && heroesHealth[6] > 0 && indexRespawn < 0) {
                 heroesHealth[i] = heroesHealth[6];
                 heroesHealth[6] = 0;
+                indexRespawn = i;
             }
             if (heroesAttackType[i] == "Heal" || heroesHealth[i] == 0) continue;
             if (heroesHealth[i] < 100 &&
-                    (index == -1 || heroesHealth[i] < heroesHealth[index])) {
-                heroesHealth[i] += 40;
-                index = i;
+                    (indexHeal == -1 || heroesHealth[i] < heroesHealth[indexHeal])) {
+                indexHeal = i;
             }
         }
 
-        if (index >= 0) System.out.println("Medic heals: " + heroesAttackType[index]);
+        if (indexHeal >= 0) {
+            heroesHealth[indexHeal] += 20;
+            System.out.println("Medic heals: " + heroesAttackType[indexHeal]);
+        }
+        if (indexRespawn >= 0) {
+            System.out.println("Wither respawns: " + heroesAttackType[indexRespawn]);
+        }
+
     }
 
 
@@ -162,7 +165,6 @@ public class Homework {
                     System.out.println(heroesAttackType[i] +
                             " Health: " + heroesHealth[i] +
                             " Dodged");
-                    isHeroLuckyDodged = false;
                 } else {
                     System.out.println(heroesAttackType[i] + " Health: " + heroesHealth[i]);
                     continue;
@@ -173,17 +175,16 @@ public class Homework {
                         " Damage: " + heroesDamage[i] +
                         " Made Stun");
             } else {
-                System.out.println(heroesAttackType[i] +
+                if (heroesHealth[i] == 0) System.out.println(heroesAttackType[i] +
+                        " Health: " + heroesHealth[i]);
+                else System.out.println(heroesAttackType[i] +
                         " Health: " + heroesHealth[i] +
                         " Damage: " + heroesDamage[i]);
             }
         }
 
-        if (isBossStunning > 1) isBossStunning--;
-        else {
-            isBossStunned = false;
-            isBossStunning--;
-        }
+        isHeroLuckyDodged = false;
+        if (isBossStunning > 0) isBossStunning--;
 
         if (critMessage != null) System.out.println(critMessage);
     }
